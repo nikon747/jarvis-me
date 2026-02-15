@@ -95,7 +95,7 @@ class TaskUpdate(BaseModel):
 
 class TTSRequest(BaseModel):
     text: str
-    voice: str = "nova"
+    voice: str = "onyx"  # Default to JARVIS-like voice (deep, authoritative)
     speed: float = 1.0
 
 # ============== JARVIS SYSTEM PROMPT ==============
