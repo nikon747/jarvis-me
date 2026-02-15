@@ -362,6 +362,196 @@ async def delete_task(task_id: str):
         raise HTTPException(status_code=404, detail="Task not found")
     return {"message": "Task deleted"}
 
+# ============== REMINDER ENDPOINTS ==============
+
+@api_router.post("/reminders", response_model=Reminder)
+async def create_reminder(reminder: ReminderCreate):
+    """Create a new reminder"""
+    now = datetime.now(timezone.utc).isoformat()
+    new_reminder = Reminder(
+        title=reminder.title,
+        description=reminder.description or "",
+        reminder_time=reminder.reminder_time,
+        repeat=reminder.repeat,
+        is_active=True,
+        triggered=False,
+        created_at=now,
+        updated_at=now
+    )
+    doc = new_reminder.model_dump()
+    await db.reminders.insert_one(doc)
+    return new_reminder
+
+@api_router.get("/reminders", response_model=List[Reminder])
+async def get_reminders(active_only: bool = False):
+    """Get all reminders"""
+    query = {"is_active": True} if active_only else {}
+    reminders = await db.reminders.find(query, {"_id": 0}).sort("reminder_time", 1).to_list(100)
+    return reminders
+
+@api_router.get("/reminders/due")
+async def get_due_reminders():
+    """Get reminders that are due (for voice alerts)"""
+    now = datetime.now(timezone.utc).isoformat()
+    # Get reminders that are due and not yet triggered
+    due_reminders = await db.reminders.find({
+        "is_active": True,
+        "triggered": False,
+        "reminder_time": {"$lte": now}
+    }, {"_id": 0}).to_list(100)
+    
+    # Mark them as triggered
+    for reminder in due_reminders:
+        await db.reminders.update_one(
+            {"id": reminder["id"]},
+            {"$set": {"triggered": True, "updated_at": now}}
+        )
+        
+        # Handle repeating reminders
+        if reminder["repeat"] != "none":
+            from datetime import timedelta
+            reminder_dt = datetime.fromisoformat(reminder["reminder_time"].replace('Z', '+00:00'))
+            
+            if reminder["repeat"] == "daily":
+                new_time = reminder_dt + timedelta(days=1)
+            elif reminder["repeat"] == "weekly":
+                new_time = reminder_dt + timedelta(weeks=1)
+            elif reminder["repeat"] == "monthly":
+                new_time = reminder_dt + timedelta(days=30)
+            else:
+                continue
+                
+            # Create next occurrence
+            new_reminder = Reminder(
+                title=reminder["title"],
+                description=reminder["description"],
+                reminder_time=new_time.isoformat(),
+                repeat=reminder["repeat"],
+                is_active=True,
+                triggered=False,
+                created_at=now,
+                updated_at=now
+            )
+            await db.reminders.insert_one(new_reminder.model_dump())
+    
+    return due_reminders
+
+@api_router.patch("/reminders/{reminder_id}", response_model=Reminder)
+async def update_reminder(reminder_id: str, update: ReminderUpdate):
+    """Update a reminder"""
+    existing = await db.reminders.find_one({"id": reminder_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Reminder not found")
+    
+    update_dict = {k: v for k, v in update.model_dump().items() if v is not None}
+    update_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.reminders.update_one({"id": reminder_id}, {"$set": update_dict})
+    updated = await db.reminders.find_one({"id": reminder_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/reminders/{reminder_id}")
+async def delete_reminder(reminder_id: str):
+    """Delete a reminder"""
+    result = await db.reminders.delete_one({"id": reminder_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Reminder not found")
+    return {"message": "Reminder deleted"}
+
+# ============== WEATHER ENDPOINT ==============
+
+@api_router.get("/weather")
+async def get_weather(city: str = "London", units: str = "metric"):
+    """Get weather data for a city using Open-Meteo (free, no API key needed)"""
+    try:
+        # First, geocode the city name to get coordinates
+        async with httpx.AsyncClient() as client:
+            # Use Open-Meteo's geocoding API
+            geocode_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1"
+            geo_response = await client.get(geocode_url)
+            geo_data = geo_response.json()
+            
+            if "results" not in geo_data or len(geo_data["results"]) == 0:
+                raise HTTPException(status_code=404, detail=f"City '{city}' not found")
+            
+            location = geo_data["results"][0]
+            lat = location["latitude"]
+            lon = location["longitude"]
+            city_name = location["name"]
+            country = location.get("country", "")
+            
+            # Get weather data
+            temp_unit = "celsius" if units == "metric" else "fahrenheit"
+            wind_unit = "kmh" if units == "metric" else "mph"
+            weather_url = (
+                f"https://api.open-meteo.com/v1/forecast?"
+                f"latitude={lat}&longitude={lon}"
+                f"&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m"
+                f"&daily=temperature_2m_max,temperature_2m_min,weather_code"
+                f"&temperature_unit={temp_unit}&wind_speed_unit={wind_unit}"
+                f"&timezone=auto"
+            )
+            
+            weather_response = await client.get(weather_url)
+            weather_data = weather_response.json()
+            
+            # Weather code descriptions
+            weather_codes = {
+                0: "Clear sky",
+                1: "Mainly clear",
+                2: "Partly cloudy",
+                3: "Overcast",
+                45: "Foggy",
+                48: "Depositing rime fog",
+                51: "Light drizzle",
+                53: "Moderate drizzle",
+                55: "Dense drizzle",
+                61: "Slight rain",
+                63: "Moderate rain",
+                65: "Heavy rain",
+                71: "Slight snow",
+                73: "Moderate snow",
+                75: "Heavy snow",
+                77: "Snow grains",
+                80: "Slight rain showers",
+                81: "Moderate rain showers",
+                82: "Violent rain showers",
+                85: "Slight snow showers",
+                86: "Heavy snow showers",
+                95: "Thunderstorm",
+                96: "Thunderstorm with slight hail",
+                99: "Thunderstorm with heavy hail"
+            }
+            
+            current = weather_data.get("current", {})
+            daily = weather_data.get("daily", {})
+            
+            weather_code = current.get("weather_code", 0)
+            description = weather_codes.get(weather_code, "Unknown")
+            
+            return {
+                "city": city_name,
+                "country": country,
+                "temperature": current.get("temperature_2m"),
+                "humidity": current.get("relative_humidity_2m"),
+                "wind_speed": current.get("wind_speed_10m"),
+                "description": description,
+                "weather_code": weather_code,
+                "units": units,
+                "temp_unit": "°C" if units == "metric" else "°F",
+                "wind_unit": "km/h" if units == "metric" else "mph",
+                "forecast": {
+                    "dates": daily.get("time", [])[:5],
+                    "max_temps": daily.get("temperature_2m_max", [])[:5],
+                    "min_temps": daily.get("temperature_2m_min", [])[:5],
+                    "codes": daily.get("weather_code", [])[:5]
+                }
+            }
+            
+    except httpx.RequestError as e:
+        logger.error(f"Weather API error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch weather data")
+
 # ============== STATS ENDPOINT ==============
 
 @api_router.get("/stats")
