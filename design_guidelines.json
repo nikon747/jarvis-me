@@ -1,0 +1,132 @@
+{
+  "design_system": {
+    "identity": {
+      "name": "Jarvis AI",
+      "aesthetic": "Futuristic HUD / Iron Man Interface",
+      "theme": "dark",
+      "core_values": ["Precision", "Intelligence", "Speed", "Holographic"]
+    },
+    "typography": {
+      "font_family": {
+        "headings": "Orbitron, sans-serif",
+        "subheadings": "Rajdhani, sans-serif",
+        "body": "Barlow, sans-serif",
+        "code": "JetBrains Mono, monospace"
+      },
+      "scale": {
+        "h1": "text-6xl font-bold tracking-tighter uppercase",
+        "h2": "text-4xl font-bold tracking-tight uppercase",
+        "h3": "text-2xl font-semibold tracking-wide uppercase",
+        "body": "text-base font-normal leading-relaxed",
+        "caption": "text-xs font-mono tracking-widest uppercase opacity-70"
+      },
+      "imports": [
+        "https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Barlow:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap"
+      ]
+    },
+    "colors": {
+      "palette": {
+        "void": "#020204",
+        "obsidian": "#0A0A0F",
+        "glass": "rgba(10, 10, 15, 0.6)",
+        "neon_blue": "#00F0FF",
+        "hologram_cyan": "#00FFFF",
+        "alert_red": "#FF3B30",
+        "warning_amber": "#FFD60A",
+        "success_green": "#39FF14",
+        "text_primary": "#E0E0E0",
+        "text_secondary": "#94A3B8",
+        "border_dim": "rgba(0, 240, 255, 0.1)",
+        "border_glow": "rgba(0, 240, 255, 0.5)"
+      },
+      "usage": {
+        "background": "bg-[#020204]",
+        "surface": "bg-[#0A0A0F]/80 backdrop-blur-xl border border-[#00F0FF]/10",
+        "primary_text": "text-[#E0E0E0]",
+        "accent_text": "text-[#00F0FF] drop-shadow-[0_0_10px_rgba(0,240,255,0.5)]",
+        "border_active": "border-[#00F0FF]/50 shadow-[0_0_15px_rgba(0,240,255,0.3)]"
+      }
+    },
+    "layout": {
+      "grid_system": "Bento Grid (Technical)",
+      "spacing": "Generous (p-8, p-12)",
+      "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+      "radius": "rounded-none",
+      "borders": "1px solid rgba(0, 240, 255, 0.1)"
+    },
+    "visual_enhancers": {
+      "glassmorphism": "backdrop-blur-xl bg-black/40 border border-white/10",
+      "neon_glow": "shadow-[0_0_20px_rgba(0,240,255,0.3)]",
+      "scanlines": "bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))]",
+      "cut_corners": "clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%)"
+    },
+    "motion": {
+      "library": "framer-motion",
+      "defaults": {
+        "duration": 0.4,
+        "ease": "circOut"
+      },
+      "animations": {
+        "fade_in": { "initial": { "opacity": 0 }, "animate": { "opacity": 1 } },
+        "slide_up": { "initial": { "y": 20, "opacity": 0 }, "animate": { "y": 0, "opacity": 1 } },
+        "scale_in": { "initial": { "scale": 0.9, "opacity": 0 }, "animate": { "scale": 1, "opacity": 1 } },
+        "glitch": "animate-pulse"
+      }
+    },
+    "components": {
+      "Button": {
+        "base": "relative overflow-hidden font-orbitron uppercase tracking-widest text-sm font-bold transition-all duration-300",
+        "variants": {
+          "primary": "bg-[#00F0FF]/10 text-[#00F0FF] border border-[#00F0FF]/50 hover:bg-[#00F0FF]/20 hover:shadow-[0_0_20px_rgba(0,240,255,0.4)]",
+          "secondary": "bg-transparent text-white/70 border border-white/10 hover:text-white hover:border-white/30",
+          "destructive": "bg-red-500/10 text-red-500 border border-red-500/50 hover:bg-red-500/20"
+        }
+      },
+      "Card": {
+        "base": "bg-[#0A0A0F]/60 backdrop-blur-md border border-[#00F0FF]/10 p-6 relative overflow-hidden group hover:border-[#00F0FF]/30 transition-colors duration-500"
+      },
+      "Input": {
+        "base": "bg-black/50 border-b border-[#00F0FF]/30 text-[#00F0FF] font-mono focus:border-[#00F0FF] focus:ring-0 focus:outline-none placeholder:text-[#00F0FF]/30 rounded-none px-4 py-3"
+      }
+    },
+    "assets": {
+      "images": {
+        "hero_bg": "https://images.unsplash.com/photo-1630983410779-88aba3aac0ce?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzZ8MHwxfHNlYXJjaHwxfHxjeWJlcnB1bmslMjBjaXR5JTIwc2t5bGluZSUyMG5pZ2h0fGVufDB8fHx8MTc3MTE0ODQ3MHww&ixlib=rb-4.1.0&q=85",
+        "ai_avatar": "https://images.unsplash.com/photo-1764336312138-14a5368a6cd3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHwxfHxhcnRpZmljaWFsJTIwaW50ZWxsaWdlbmNlJTIwZGlnaXRhbCUyMGJyYWluJTIwYmx1ZXxlbnwwfHx8fDE3NzExNDg0NjR8MA&ixlib=rb-4.1.0&q=85",
+        "hud_texture": "https://images.unsplash.com/photo-1620403661092-1750c6d4148a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAxODF8MHwxfHNlYXJjaHwxfHxmdXR1cmlzdGljJTIwaHVkJTIwaW50ZXJmYWNlJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NzExNDg0NTl8MA&ixlib=rb-4.1.0&q=85"
+      },
+      "icons": "lucide-react"
+    }
+  },
+  "instructions_to_main_agent": [
+    "1. INSTALL FONTS: Add the Google Fonts import link to the <head> of public/index.html immediately.",
+    "2. CONFIGURE TAILWIND: Update tailwind.config.js to include the custom colors (void, obsidian, neon_blue) and fonts (Orbitron, Rajdhani).",
+    "3. GLOBAL CSS: Update index.css to set the default background to 'void' (#020204) and text to 'text_primary'. Add a global 'scanline' overlay using ::after on the body.",
+    "4. COMPONENT OVERRIDES: Do not use default Shadcn styles. Override them with the 'futuristic' variants defined in 'components'. Remove rounded corners (rounded-none) for a technical look.",
+    "5. LAYOUT: Use the 'Bento Grid' for the dashboard. Create a 'Sidebar' that looks like a HUD panel (left side) and a 'Main Content' area that feels like a viewport.",
+    "6. VOICE INTERFACE: The central element should be the 'Arc Reactor' or 'AI Orb' (use the ai_avatar image or a CSS/Framer Motion animation). It must pulse when 'listening' or 'speaking'.",
+    "7. CHAT INTERFACE: Messages should look like data logs. User messages aligned right (Green/Cyan), AI messages aligned left (Blue/White). Use JetBrains Mono for code blocks.",
+    "8. MICRO-INTERACTIONS: Add sound effects (optional but recommended) or visual cues (borders glowing) on hover/click.",
+    "9. DO NOT use white backgrounds anywhere. The app must be strictly Dark Mode."
+  ],
+  "universal_guidelines": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy",
+    "Use glass-morphism effects with backdrop filters (12-24px blur)",
+    "You MUST NOT apply universal transition. Eg: transition: all. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms",
+    "You MUST NOT center align the app container, ie do not add .App { text-align: center; } in the css file. This disrupts the human natural reading flow of text",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style",
+    "NEVER: use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯📚🎭🎬🎪🎉🎊🎁🎀🎂🍰🎈🎨🎰💰💵💳🏦💎🪙💸🤑📊📈📉💹🔢🏆🥇 etc for icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.",
+    "Main agent relies on these image URLs. Missing categories (especially sponsor logos) = main agent will use placeholder text which is FORBIDDEN",
+    "Prioritize using pre-existing components from src/components/ui when applicable",
+    "Create new components that match the style and conventions of existing components when needed",
+    "Examine existing components to understand the project's component patterns before creating new ones",
+    "Components MUST use named exports (export const ComponentName = ...)",
+    "Pages MUST use default exports (export default function PageName() {...})",
+    "Use sonner for toasts"
+  ]
+}
