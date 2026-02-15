@@ -1,4 +1,4 @@
-import { RefreshCw, MessageSquare, CheckSquare, Activity, Zap } from 'lucide-react';
+import { RefreshCw, MessageSquare, CheckSquare, Activity, Zap, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export const StatsPanel = ({ stats, onRefresh }) => {
@@ -26,6 +26,12 @@ export const StatsPanel = ({ stats, onRefresh }) => {
       value: stats?.pending_tasks || 0,
       icon: Zap,
       color: 'alert-red',
+    },
+    {
+      label: 'ACTIVE REMINDERS',
+      value: stats?.active_reminders || 0,
+      icon: Bell,
+      color: 'alert-amber',
     },
   ];
 
