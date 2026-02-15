@@ -359,7 +359,7 @@ export default function JarvisApp() {
                 title={isWakeWordListening ? 'Wake word detection active' : 'Enable wake word detection'}
                 data-testid="toggle-wake-word"
               >
-                {isWakeWordListening ? <Radio size={18} /> : <RadioOff size={18} />}
+                {isWakeWordListening ? <Wifi size={18} /> : <WifiOff size={18} />}
               </button>
             </div>
 
