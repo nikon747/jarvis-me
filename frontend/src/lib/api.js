@@ -38,10 +38,11 @@ export const api = {
   },
 
   // Chat
-  sendMessage: async (conversationId, message) => {
+  sendMessage: async (conversationId, message, voice = 'onyx') => {
     const response = await axios.post(`${API}/chat`, {
       conversation_id: conversationId,
       message: message,
+      voice: voice,
     });
     return response.data;
   },
