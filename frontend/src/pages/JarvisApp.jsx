@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Mic, MicOff, Send, Volume2, VolumeX, Plus, Trash2, MessageSquare, CheckSquare, BarChart3, Bell, Cloud, Radio, RadioOff, ChevronDown } from 'lucide-react';
+import { Mic, MicOff, Send, Volume2, VolumeX, Plus, Trash2, MessageSquare, CheckSquare, BarChart3, Bell, Cloud, Wifi, WifiOff, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
