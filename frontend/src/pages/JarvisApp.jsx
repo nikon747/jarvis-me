@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, Send, Volume2, VolumeX, Plus, Trash2, MessageSquare, CheckSquare, BarChart3, Settings, X, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Mic, MicOff, Send, Volume2, VolumeX, Plus, Trash2, MessageSquare, CheckSquare, BarChart3, Bell, Cloud, Radio, RadioOff, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,11 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import api from '@/lib/api';
 import useAudioRecorder from '@/hooks/useAudioRecorder';
 import useAudioPlayer from '@/hooks/useAudioPlayer';
+import useWakeWord from '@/hooks/useWakeWord';
 import JarvisOrb from '@/components/jarvis/JarvisOrb';
 import ChatMessage from '@/components/jarvis/ChatMessage';
 import TaskPanel from '@/components/jarvis/TaskPanel';
 import ConversationList from '@/components/jarvis/ConversationList';
 import StatsPanel from '@/components/jarvis/StatsPanel';
+import RemindersPanel from '@/components/jarvis/RemindersPanel';
+import WeatherPanel from '@/components/jarvis/WeatherPanel';
 
 export default function JarvisApp() {
   const [activeConversation, setActiveConversation] = useState(null);
@@ -21,14 +24,40 @@ export default function JarvisApp() {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
-  const [activePanel, setActivePanel] = useState('chat'); // 'chat', 'tasks', 'stats'
+  const [activePanel, setActivePanel] = useState('chat'); // 'chat', 'tasks', 'reminders', 'stats'
   const [autoPlayAudio, setAutoPlayAudio] = useState(true);
   const [voiceType, setVoiceType] = useState('onyx'); // JARVIS-like deep voice
   const [stats, setStats] = useState(null);
+  const [wakeWordEnabled, setWakeWordEnabled] = useState(false);
   
   const messagesEndRef = useRef(null);
   const { isRecording, audioBlob, startRecording, stopRecording, clearRecording, error: recordError } = useAudioRecorder();
   const { isPlaying, playAudio, stopAudio } = useAudioPlayer();
+
+  // Wake word detection handler
+  const handleWakeWord = useCallback((command) => {
+    toast.success('Wake word detected!', { description: command ? `Command: "${command}"` : 'Listening for command...' });
+    
+    if (command && command.trim()) {
+      setInputText(command.trim());
+      // Auto-send after wake word detection with command
+      setTimeout(() => {
+        handleSendMessage(command.trim());
+      }, 500);
+    } else {
+      // Start recording if no command detected
+      startRecording();
+    }
+  }, [startRecording]);
+
+  const { isListening: isWakeWordListening, isSupported: isWakeWordSupported, toggleListening: toggleWakeWord } = useWakeWord('jarvis', handleWakeWord);
+
+  // Toggle wake word detection
+  useEffect(() => {
+    if (wakeWordEnabled && isWakeWordSupported) {
+      // Wake word is controlled by the hook
+    }
+  }, [wakeWordEnabled, isWakeWordSupported]);
 
   // Load conversations on mount
   useEffect(() => {
@@ -128,8 +157,9 @@ export default function JarvisApp() {
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!inputText.trim()) return;
+  const handleSendMessage = async (textOverride = null) => {
+    const messageText = textOverride || inputText;
+    if (!messageText.trim()) return;
     
     // Create conversation if none exists
     if (!activeConversation) {
@@ -137,14 +167,14 @@ export default function JarvisApp() {
         const conversation = await api.createConversation('New Conversation');
         setConversations(prev => [conversation, ...prev]);
         setActiveConversation(conversation);
-        await sendMessageToConversation(conversation.id, inputText.trim());
+        await sendMessageToConversation(conversation.id, messageText.trim());
       } catch (err) {
         toast.error('Failed to create conversation');
       }
       return;
     }
     
-    await sendMessageToConversation(activeConversation.id, inputText.trim());
+    await sendMessageToConversation(activeConversation.id, messageText.trim());
   };
 
   const sendMessageToConversation = async (conversationId, message) => {
@@ -191,6 +221,28 @@ export default function JarvisApp() {
     } else {
       startRecording();
     }
+  };
+
+  // Handle reminder voice alerts
+  const handleReminderDue = async (reminder) => {
+    try {
+      const message = `Reminder: ${reminder.title}. ${reminder.description || ''}`;
+      const ttsResponse = await api.textToSpeech(message, voiceType, 1.0);
+      if (ttsResponse.audio_base64) {
+        playAudio(ttsResponse.audio_base64);
+      }
+    } catch (err) {
+      console.error('Failed to play reminder voice:', err);
+    }
+  };
+
+  const handleWakeWordToggle = () => {
+    if (!isWakeWordSupported) {
+      toast.error('Wake word detection is not supported in this browser');
+      return;
+    }
+    setWakeWordEnabled(!wakeWordEnabled);
+    toggleWakeWord();
   };
 
   return (
@@ -240,6 +292,18 @@ export default function JarvisApp() {
               TASK MANAGEMENT
             </button>
             <button
+              onClick={() => setActivePanel('reminders')}
+              className={`w-full flex items-center gap-3 px-4 py-3 font-rajdhani font-semibold tracking-wide transition-colors ${
+                activePanel === 'reminders' 
+                  ? 'bg-neon-blue/10 text-neon-blue border-l-2 border-neon-blue' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+              }`}
+              data-testid="nav-reminders"
+            >
+              <Bell size={18} />
+              REMINDERS
+            </button>
+            <button
               onClick={() => setActivePanel('stats')}
               className={`w-full flex items-center gap-3 px-4 py-3 font-rajdhani font-semibold tracking-wide transition-colors ${
                 activePanel === 'stats' 
@@ -275,8 +339,31 @@ export default function JarvisApp() {
             </div>
           )}
 
+          {/* Weather Widget (when not in chat) */}
+          {activePanel !== 'chat' && (
+            <div className="flex-1 overflow-auto p-4">
+              <WeatherPanel />
+            </div>
+          )}
+
           {/* Settings */}
           <div className="p-4 border-t border-neon-blue/10 space-y-4">
+            {/* Wake Word Detection */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono text-muted-foreground tracking-wider">HEY JARVIS</span>
+              <button
+                onClick={handleWakeWordToggle}
+                className={`p-2 rounded transition-colors ${
+                  isWakeWordListening ? 'text-alert-green bg-alert-green/10' : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title={isWakeWordListening ? 'Wake word detection active' : 'Enable wake word detection'}
+                data-testid="toggle-wake-word"
+              >
+                {isWakeWordListening ? <Radio size={18} /> : <RadioOff size={18} />}
+              </button>
+            </div>
+
+            {/* Auto-play Voice */}
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono text-muted-foreground tracking-wider">AUTO-PLAY VOICE</span>
               <button
@@ -290,6 +377,7 @@ export default function JarvisApp() {
               </button>
             </div>
             
+            {/* Voice Type */}
             <div>
               <span className="text-xs font-mono text-muted-foreground tracking-wider block mb-2">VOICE TYPE</span>
               <Select value={voiceType} onValueChange={setVoiceType}>
@@ -327,11 +415,20 @@ export default function JarvisApp() {
                       }
                     </p>
                   </div>
-                  <JarvisOrb 
-                    isActive={isLoading || isRecording || isPlaying}
-                    isRecording={isRecording}
-                    isSpeaking={isPlaying}
-                  />
+                  <div className="flex items-center gap-4">
+                    {/* Wake word indicator */}
+                    {isWakeWordListening && (
+                      <div className="flex items-center gap-2 text-xs font-mono text-alert-green">
+                        <Radio size={14} className="animate-pulse" />
+                        LISTENING
+                      </div>
+                    )}
+                    <JarvisOrb 
+                      isActive={isLoading || isRecording || isPlaying}
+                      isRecording={isRecording}
+                      isSpeaking={isPlaying}
+                    />
+                  </div>
                 </div>
               </header>
 
@@ -346,10 +443,18 @@ export default function JarvisApp() {
                       <h3 className="font-orbitron text-xl text-muted-foreground mb-2">
                         AWAITING COMMAND
                       </h3>
-                      <p className="text-sm text-muted-foreground/70 font-barlow max-w-md mx-auto">
+                      <p className="text-sm text-muted-foreground/70 font-barlow max-w-md mx-auto mb-4">
                         Good day. I am J.A.R.V.I.S., your personal AI assistant. 
-                        How may I assist you today? You can type or use voice commands.
+                        How may I assist you today?
                       </p>
+                      {isWakeWordSupported && (
+                        <p className="text-xs text-neon-blue/50 font-mono">
+                          {isWakeWordListening 
+                            ? 'Say "Hey JARVIS" to activate voice command'
+                            : 'Enable "Hey JARVIS" for hands-free activation'
+                          }
+                        </p>
+                      )}
                     </div>
                   ) : (
                     messages.map((msg, index) => (
@@ -419,7 +524,7 @@ export default function JarvisApp() {
                       data-testid="chat-input"
                     />
                     <Button
-                      onClick={handleSendMessage}
+                      onClick={() => handleSendMessage()}
                       disabled={!inputText.trim() || isLoading}
                       className="absolute right-2 top-1/2 -translate-y-1/2 bg-neon-blue/20 text-neon-blue hover:bg-neon-blue/30 p-2 h-auto"
                       data-testid="send-btn"
@@ -445,6 +550,12 @@ export default function JarvisApp() {
           )}
 
           {activePanel === 'tasks' && <TaskPanel />}
+          {activePanel === 'reminders' && (
+            <RemindersPanel 
+              onReminderDue={handleReminderDue}
+              voiceEnabled={autoPlayAudio}
+            />
+          )}
           {activePanel === 'stats' && <StatsPanel stats={stats} onRefresh={loadStats} />}
         </main>
       </div>
