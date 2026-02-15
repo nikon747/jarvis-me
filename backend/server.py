@@ -64,6 +64,7 @@ class Conversation(BaseModel):
 class ChatRequest(BaseModel):
     conversation_id: str
     message: str
+    voice: str = "onyx"  # JARVIS-like voice by default
 
 class ChatResponse(BaseModel):
     response: str
