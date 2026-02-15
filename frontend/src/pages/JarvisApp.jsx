@@ -419,7 +419,7 @@ export default function JarvisApp() {
                     {/* Wake word indicator */}
                     {isWakeWordListening && (
                       <div className="flex items-center gap-2 text-xs font-mono text-alert-green">
-                        <Radio size={14} className="animate-pulse" />
+                        <Wifi size={14} className="animate-pulse" />
                         LISTENING
                       </div>
                     )}
