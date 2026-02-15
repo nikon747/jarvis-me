@@ -212,7 +212,7 @@ async def chat(request: ChatRequest):
         audio_base64 = await tts.generate_speech_base64(
             text=response[:4096],  # TTS has 4096 char limit
             model="tts-1-hd",  # High quality for better voice
-            voice="onyx"  # Deep, authoritative - fits JARVIS persona
+            voice=request.voice  # Use selected voice (default: onyx for JARVIS)
         )
         
         return ChatResponse(response=response, audio_base64=audio_base64)
