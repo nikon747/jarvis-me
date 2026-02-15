@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import api from '@/lib/api';
 import useAudioRecorder from '@/hooks/useAudioRecorder';
 import useAudioPlayer from '@/hooks/useAudioPlayer';
 import JarvisOrb from '@/components/jarvis/JarvisOrb';
