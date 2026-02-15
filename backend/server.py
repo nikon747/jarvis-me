@@ -206,12 +206,12 @@ async def chat(request: ChatRequest):
             }
         )
         
-        # Generate audio response
+        # Generate audio response with JARVIS-like voice (onyx = deep, authoritative)
         tts = OpenAITextToSpeech(api_key=EMERGENT_LLM_KEY)
         audio_base64 = await tts.generate_speech_base64(
             text=response[:4096],  # TTS has 4096 char limit
-            model="tts-1",
-            voice="nova"
+            model="tts-1-hd",  # High quality for better voice
+            voice="onyx"  # Deep, authoritative - fits JARVIS persona
         )
         
         return ChatResponse(response=response, audio_base64=audio_base64)
