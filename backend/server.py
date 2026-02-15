@@ -561,12 +561,16 @@ async def get_stats():
     total_tasks = await db.tasks.count_documents({})
     completed_tasks = await db.tasks.count_documents({"completed": True})
     pending_tasks = total_tasks - completed_tasks
+    total_reminders = await db.reminders.count_documents({})
+    active_reminders = await db.reminders.count_documents({"is_active": True, "triggered": False})
     
     return {
         "total_conversations": total_conversations,
         "total_tasks": total_tasks,
         "completed_tasks": completed_tasks,
         "pending_tasks": pending_tasks,
+        "total_reminders": total_reminders,
+        "active_reminders": active_reminders,
         "status": "Online"
     }
 
