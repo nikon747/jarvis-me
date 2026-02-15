@@ -89,6 +89,39 @@ export const api = {
     const response = await axios.delete(`${API}/tasks/${id}`);
     return response.data;
   },
+
+  // Reminders
+  createReminder: async (reminder) => {
+    const response = await axios.post(`${API}/reminders`, reminder);
+    return response.data;
+  },
+
+  getReminders: async (activeOnly = false) => {
+    const params = activeOnly ? { active_only: true } : {};
+    const response = await axios.get(`${API}/reminders`, { params });
+    return response.data;
+  },
+
+  getDueReminders: async () => {
+    const response = await axios.get(`${API}/reminders/due`);
+    return response.data;
+  },
+
+  updateReminder: async (id, updates) => {
+    const response = await axios.patch(`${API}/reminders/${id}`, updates);
+    return response.data;
+  },
+
+  deleteReminder: async (id) => {
+    const response = await axios.delete(`${API}/reminders/${id}`);
+    return response.data;
+  },
+
+  // Weather
+  getWeather: async (city = 'London', units = 'metric') => {
+    const response = await axios.get(`${API}/weather`, { params: { city, units } });
+    return response.data;
+  },
 };
 
 export default api;
