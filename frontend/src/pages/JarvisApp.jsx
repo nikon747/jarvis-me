@@ -276,7 +276,7 @@ export default function JarvisApp() {
           )}
 
           {/* Settings */}
-          <div className="p-4 border-t border-neon-blue/10">
+          <div className="p-4 border-t border-neon-blue/10 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono text-muted-foreground tracking-wider">AUTO-PLAY VOICE</span>
               <button
@@ -288,6 +288,23 @@ export default function JarvisApp() {
               >
                 {autoPlayAudio ? <Volume2 size={18} /> : <VolumeX size={18} />}
               </button>
+            </div>
+            
+            <div>
+              <span className="text-xs font-mono text-muted-foreground tracking-wider block mb-2">VOICE TYPE</span>
+              <Select value={voiceType} onValueChange={setVoiceType}>
+                <SelectTrigger className="w-full bg-black/50 border-neon-blue/30 text-xs font-mono" data-testid="voice-select">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-obsidian border-neon-blue/30">
+                  <SelectItem value="onyx">ONYX (JARVIS)</SelectItem>
+                  <SelectItem value="echo">ECHO (CALM)</SelectItem>
+                  <SelectItem value="sage">SAGE (WISE)</SelectItem>
+                  <SelectItem value="alloy">ALLOY (NEUTRAL)</SelectItem>
+                  <SelectItem value="nova">NOVA (ENERGETIC)</SelectItem>
+                  <SelectItem value="shimmer">SHIMMER (BRIGHT)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </aside>
