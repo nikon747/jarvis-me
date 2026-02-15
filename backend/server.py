@@ -12,6 +12,7 @@ import uuid
 from datetime import datetime, timezone
 import io
 import base64
+import httpx
 
 # Load environment variables
 ROOT_DIR = Path(__file__).parent
