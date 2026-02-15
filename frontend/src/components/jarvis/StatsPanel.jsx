@@ -132,9 +132,9 @@ export const StatsPanel = ({ stats, onRefresh }) => {
                 'Voice Output',
                 'Task Management',
                 'Code Assistance',
-                'General Q&A',
-                'Conversation History',
-                'Multi-language',
+                'Weather Reports',
+                'Voice Reminders',
+                'Wake Word ("Hey JARVIS")',
                 'Real-time Processing'
               ].map((capability, index) => (
                 <div 
