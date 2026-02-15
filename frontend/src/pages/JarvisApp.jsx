@@ -154,7 +154,7 @@ export default function JarvisApp() {
     setInputText('');
     
     try {
-      const response = await api.sendMessage(conversationId, message);
+      const response = await api.sendMessage(conversationId, message, voiceType);
       const assistantMessage = { 
         role: 'assistant', 
         content: response.response, 
