@@ -95,6 +95,39 @@ class TaskUpdate(BaseModel):
     due_date: Optional[str] = None
     completed: Optional[bool] = None
 
+# ============== REMINDER MODELS ==============
+
+class ReminderCreate(BaseModel):
+    title: str
+    description: Optional[str] = ""
+    reminder_time: str  # ISO format datetime
+    repeat: str = "none"  # none, daily, weekly, monthly
+
+class Reminder(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str = ""
+    reminder_time: str
+    repeat: str = "none"
+    is_active: bool = True
+    triggered: bool = False
+    created_at: str
+    updated_at: str
+
+class ReminderUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    reminder_time: Optional[str] = None
+    repeat: Optional[str] = None
+    is_active: Optional[bool] = None
+
+# ============== WEATHER MODEL ==============
+
+class WeatherRequest(BaseModel):
+    city: str
+    units: str = "metric"  # metric or imperial
+
 class TTSRequest(BaseModel):
     text: str
     voice: str = "onyx"  # Default to JARVIS-like voice (deep, authoritative)
