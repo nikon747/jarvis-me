@@ -22,6 +22,7 @@ export default function JarvisApp() {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [activePanel, setActivePanel] = useState('chat'); // 'chat', 'tasks', 'stats'
   const [autoPlayAudio, setAutoPlayAudio] = useState(true);
+  const [voiceType, setVoiceType] = useState('onyx'); // JARVIS-like deep voice
   const [stats, setStats] = useState(null);
   
   const messagesEndRef = useRef(null);
