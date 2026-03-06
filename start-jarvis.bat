@@ -1,17 +1,61 @@
 @echo off
+setlocal
 echo ========================================
 echo   Starting J.A.R.V.I.S.
 echo ========================================
 echo.
 
-:: Check if MongoDB is running
+:: Ensure MongoDB is installed and running
 echo Checking MongoDB...
-sc query MongoDB >nul 2>&1
-if %errorlevel% neq 0 (
-    echo [WARNING] MongoDB service not found
-    echo Trying to start MongoDB...
-    net start MongoDB >nul 2>&1
+set "MONGO_INSTALLED=0"
+where mongod >nul 2>&1
+if %errorlevel% equ 0 set "MONGO_INSTALLED=1"
+
+if "%MONGO_INSTALLED%"=="0" (
+    sc query MongoDB >nul 2>&1
+    if %errorlevel% equ 0 set "MONGO_INSTALLED=1"
 )
+
+if "%MONGO_INSTALLED%"=="0" (
+    sc query "MongoDB Server" >nul 2>&1
+    if %errorlevel% equ 0 set "MONGO_INSTALLED=1"
+)
+
+if "%MONGO_INSTALLED%"=="0" (
+    echo [ERROR] MongoDB is not installed or not in PATH.
+    echo Run setup-windows.bat first, or install MongoDB Community Server manually.
+    pause
+    exit /b 1
+)
+
+set "MONGO_RUNNING=0"
+
+sc query MongoDB >nul 2>&1
+if %errorlevel% equ 0 (
+    net start MongoDB >nul 2>&1
+    sc query MongoDB | findstr /C:"RUNNING" >nul 2>&1
+    if %errorlevel% equ 0 set "MONGO_RUNNING=1"
+)
+
+if "%MONGO_RUNNING%"=="0" (
+    sc query "MongoDB Server" >nul 2>&1
+    if %errorlevel% equ 0 (
+        net start "MongoDB Server" >nul 2>&1
+        sc query "MongoDB Server" | findstr /C:"RUNNING" >nul 2>&1
+        if %errorlevel% equ 0 set "MONGO_RUNNING=1"
+    )
+)
+
+if "%MONGO_RUNNING%"=="0" (
+    echo [WARNING] MongoDB service is not running.
+    echo Start it manually, then re-run this script:
+    echo   - net start MongoDB
+    echo   - or mongod --dbpath C:\data\db
+    pause
+    exit /b 1
+)
+
+echo [OK] MongoDB is running
 
 :: Start Backend in new window
 echo Starting Backend Server...
